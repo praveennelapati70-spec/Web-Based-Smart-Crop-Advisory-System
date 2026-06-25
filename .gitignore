@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+/dist
+/frontend/dist
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database backups & local databases
+*.sqlite
+*.db
+backend/database.sqlite
+*.log
+backend/server_log*.txt
+backend/error_log.json
+backend/sanity_error.json
+
+# IDEs & System files
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db
+.vercel
+.gemini/

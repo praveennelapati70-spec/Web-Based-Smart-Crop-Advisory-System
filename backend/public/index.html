@@ -489,8 +489,8 @@
         // API Logic
         async function handleLogin(e) {
             e.preventDefault();
-            const user = document.getElementById('loginUser').value;
-            const pass = document.getElementById('loginPass').value;
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
             const err = document.getElementById('loginError');
 
             err.style.display = 'none';
@@ -509,17 +509,17 @@
                     err.style.display = 'block';
                 }
             } catch (error) {
-                err.innerText = "Server Error";
+                err.innerText = "Server Error. Is the backend running?";
                 err.style.display = 'block';
             }
         }
 
         async function handleRegister(e) {
             e.preventDefault();
-            const user = document.getElementById('regUser').value;
-            const email = document.getElementById('regEmail').value;
-            const pass = document.getElementById('regPass').value;
-            const confirmPass = document.getElementById('regConfirmPass').value;
+            const user = document.getElementById('regUser').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            const confirmPass = document.getElementById('regConfirmPass').value.trim();
             const err = document.getElementById('regError');
 
             err.style.display = 'none';

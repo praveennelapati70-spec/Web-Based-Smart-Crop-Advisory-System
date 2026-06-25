@@ -327,11 +327,13 @@ app.get('/api/weather/ap', async (req, res) => {
 });
 
 // Serve Frontend Static Files
-app.use(express.static('public'));
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Configure Multer for File Uploads
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' }); // Temporary storage
+const os = require('os');
+const upload = multer({ dest: os.tmpdir() }); // Temporary storage using OS temp folder (writable on Vercel)
 
 app.post('/api/pest-detection', upload.single('image'), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
@@ -610,14 +612,23 @@ app.post('/api/register', async (req, res) => {
         return res.json({ success: true, message: 'Registration successful!' });
 
     } catch (err) {
-        console.error("Register Error:", err); // DEBUG
+        // Handle Duplicate Entry specifically
+        if (err.code === 'ER_DUP_ENTRY') {
+            console.log("Registration Failed: Duplicate Entry");
+            return res.status(409).json({ success: false, message: 'Username or Email already exists' });
+        }
+        console.error("Register Error:", err);
         return res.status(500).json({ success: false, message: 'Database error' });
     }
 });
 
 // 4. LOGIN API (MySQL Integrated)
 app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
+    let { username, password } = req.body;
+
+    // Trim inputs to avoid accidental spaces
+    username = username ? username.trim() : '';
+    password = password ? password.trim() : '';
 
     if (!username || !password) {
         return res.status(400).json({ success: false, message: 'Username and password required' });
@@ -654,13 +665,21 @@ const initDb = async () => {
             )
         `);
         console.log("Database initialized: Users table ready.");
-
-        app.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
-        });
     } catch (err) {
-        console.error("Failed to initialize database:", err);
+        console.error("Failed to initialize database tables:", err.message);
     }
 };
 
-initDb();
+if (!process.env.VERCEL) {
+    // Only run initialization and start express server locally
+    initDb().then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    });
+} else {
+    // On Vercel, initialize tables lazily when serverless module loads
+    initDb();
+}
+
+module.exports = app;
